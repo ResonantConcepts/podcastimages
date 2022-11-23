@@ -2,7 +2,3 @@ name = "podcastimages"
 compatibility_date = "2022-11-19"
 node_compat = true
 
-[vars]
-API_KEY = "API_KEY"
-API_SECRET = "API_SECRET"
-

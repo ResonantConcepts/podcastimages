@@ -1,53 +1,96 @@
 import { Router } from 'itty-router';
-import apiClient from './features/podcastindex/podcastindex';
+import PIndexClient from './features/podcastindex/podcastindex';
+import ImageClient, { VARIANT_OPTIONS } from './features/images/images-api';
 
 const router = Router();
-
-const VARIANT_OPTIONS = ['32', '64', '128', '256', '512', '1024'];
 
 router.get('/feed/:podcastGUID/:variant?', async ({ params }) => {
   if (!params) return new Response('No params', { status: 400 });
 
-  const { podcastGUID, variant } = params;
+  try {
+    const { podcastGUID, variant } = params;
 
-  const info = await apiClient.getPodcastByGUID(podcastGUID);
+    const response = await PIndexClient.getPodcastByGUID(podcastGUID);
 
-  return new Response(JSON.stringify(info));
+    const { image, imageUrlHash } = response.feed;
+
+    if (response.description === 'No feeds match this guid.')
+      return new Response('Show not found.', { status: 404 });
+
+    const upload: any = await ImageClient.uploadImage(
+      image,
+      imageUrlHash.toString()
+    );
+
+    // image already exists on Cloudflare or it was uplodaded with success
+    const success =
+      upload.statusText === 'Conflict' || (await upload.json()).success;
+
+    if (success) {
+      let imgUrl = `https://imagedelivery.net/${CLOUDFLARE_ACCOUNT_HASH}/${imageUrlHash}`;
+      if (variant && [VARIANT_OPTIONS.includes(variant)])
+        imgUrl += `/${variant}`;
+      else imgUrl += '/1024';
+
+      return fetch(imgUrl);
+    }
+  } catch (error) {
+    console.error(error);
+    return new Response('Internal error', { status: 400 });
+  }
+
+  // GUID not found
+  return new Response('Invalid parameters', { status: 404 });
 });
 
-router.get('/feed/:feedId/item/:episodeGUID/:variant?', async ({ params }) => {
-  if (!params) return new Response('No params', { status: 400 });
+router.get(
+  '/feed/:podcastGUID/item/:episodeGUID/:variant?',
+  async ({ params }) => {
+    if (!params) return new Response('No params', { status: 400 });
 
-  const { feedId, episodeGUID, variant } = params;
+    try {
+      const { podcastGUID, episodeGUID, variant } = params;
 
-  const info = await apiClient.getEpisodeByGUID(feedId, episodeGUID);
+      const response = await PIndexClient.getEpisodeByGUID(
+        podcastGUID,
+        episodeGUID
+      );
 
-  return new Response(JSON.stringify(info));
-});
+      if (response.description === 'Episode not found.')
+        return new Response('Episode not found', { status: 404 });
+
+      const { image } = response.episode;
+      const imageUrlHash = `${podcastGUID}-${episodeGUID}`;
+
+      const upload: any = await ImageClient.uploadImage(
+        image,
+        imageUrlHash.toString()
+      );
+
+      // image already exists on Cloudflare or it was uplodaded with success
+      const success =
+        upload.statusText === 'Conflict' || (await upload.json()).success;
+
+      if (success) {
+        let imgUrl = `https://imagedelivery.net/${CLOUDFLARE_ACCOUNT_HASH}/${imageUrlHash}`;
+        if (variant && [VARIANT_OPTIONS.includes(variant)])
+          imgUrl += `/${variant}`;
+        else imgUrl += '/1024';
+
+        return fetch(imgUrl);
+      }
+    } catch (error) {
+      console.error(error);
+      return new Response('Internal error', { status: 400 });
+    }
+
+    // GUID not found
+    return new Response('Invalid parameters', { status: 404 });
+  }
+);
 
 router.all('*', () => new Response('404, not found!', { status: 404 }));
-
-export interface Env {
-  // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-  // MY_KV_NAMESPACE: KVNamespace;
-  //
-  // Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-  // MY_DURABLE_OBJECT: DurableObjectNamespace;
-  //
-  // Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-  // MY_BUCKET: R2Bucket;
-}
 
 addEventListener('fetch', (e) => {
   e.respondWith(router.handle(e.request));
 });
-
-// export default {
-// 	async fetch(
-// 		request: Request,
-// 		env: Env,
-// 		ctx: ExecutionContext
-// 	): Promise<Response> {
-// 		return new Response("Hello World!");
-// 	},
-// };
