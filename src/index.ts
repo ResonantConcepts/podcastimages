@@ -17,6 +17,9 @@ router.get('/feed/:podcastGUID/:variant?', async ({ params }) => {
     if (response.description === 'No feeds match this guid.')
       return new Response('Show not found.', { status: 404 });
 
+    if (response.status === 'false')
+      return new Response('Invalid parameters', { status: 404 });
+
     const upload: any = await ImageClient.uploadImage(
       image,
       imageUrlHash.toString()
@@ -59,7 +62,10 @@ router.get(
       if (response.description === 'Episode not found.')
         return new Response('Episode not found', { status: 404 });
 
-      const { image } = response.episode;
+      if (response.status === 'false')
+        return new Response('Invalid parameters', { status: 404 });
+
+      const image = response.episode.image || response.episode.feedImage;
       const imageUrlHash = `${podcastGUID}-${episodeGUID}`;
 
       const upload: any = await ImageClient.uploadImage(

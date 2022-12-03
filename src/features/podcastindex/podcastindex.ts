@@ -52,7 +52,7 @@ const createPodcastIndexClient = () => {
     getEpisodeByGUID: async (podcastGuid: string, episodeGuid: string) => {
       return GET<EpisodeByGUIDResponse>('episodes/byguid', {
         guid: episodeGuid,
-        feedid: podcastGuid,
+        podcastguid: podcastGuid,
       });
     },
   };
