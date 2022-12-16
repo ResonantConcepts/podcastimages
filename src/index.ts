@@ -66,7 +66,7 @@ router.get(
         return new Response('Invalid parameters', { status: 404 });
 
       const image = response.episode.image || response.episode.feedImage;
-      const imageUrlHash = `${podcastGUID}-${episodeGUID}`;
+      const imageUrlHash = response.episode.imageUrlHash || response.episode.feedImageUrlHash;
 
       const upload: any = await ImageClient.uploadImage(
         image,
@@ -92,6 +92,28 @@ router.get(
 
     // GUID not found
     return new Response('Invalid parameters', { status: 404 });
+  }
+);
+
+router.get(
+  '/hash/:imageUrlHash/:variant?',
+  async ({ params }) => {
+    if (!params) return new Response('No params', { status: 400 });
+
+    try {
+      const { imageUrlHash, variant } = params;
+
+      let imgUrl = `https://imagedelivery.net/${CLOUDFLARE_ACCOUNT_HASH}/${imageUrlHash}`;
+      if (variant && [VARIANT_OPTIONS.includes(variant)])
+        imgUrl += `/${variant}`;
+      else imgUrl += '/1024';
+
+      return fetch(imgUrl);
+
+    } catch (error) {
+      console.error(error);
+      return new Response('Internal error', { status: 400 });
+    }
   }
 );
 
