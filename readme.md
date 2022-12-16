@@ -1,75 +1,117 @@
+![Logo](/logo.svg)
 # Podcast images
+> Store, optimize, and deliver podcast images with CloudFlare Images
 
-## Goal
+## Table of Contents
+1. [About The Project](#about-the-project)
+1. [Glossary](#glossary)
+1. [Getting Started](#getting-started)
+1. [Usage](#usage)
+1. [Roadmap](#roadmap)
+1. [Contributing](#contributing)
+1. [License](#license)
 
-Cache and host podcast images allowing the entire web to use thse links.
+## About The Project
+Apple’s [artwork requirements](https://podcasters.apple.com/support/896-artwork-requirements) requires a square 3000×3000 `JPG` or `PNG` file for show covers. In reality, trusting that all feeds will conform to that guidance is a recipe for disaster. From simple issues like non-square images to slow-loading, multi-megabyte `PSD` files, scraping RSS feeds reveals a perplexing array of outliers.
+
+By using Cloudflare Images, we can cache smaller, optimized images and intelligently delivery the most optimized version of the image without worrying about file extensions.
 
 ## Glossary
 
-### Wrangler
+#### Podcast GUID
+A global unique identifier for a podcast. It may be found in an RSS feed within the [`<podcast:guid>`](https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md#guid) tag or retreived from the Podcast Index’s [`/podcasts/byfeedurl`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byfeedurl) endpoint.
 
-command line tool used by cloudflare to manage the serveless environment.
+#### Episode GUID
+A global unique identifier for an episode. It may be found in an RSS feed within an episode’s [`<guid>`](https://podcasters.apple.com/support/837-change-the-rss-feed-url#:~:text=What%E2%80%99s%20an%20episode%20GUID%3F) tag or retreived from the Podcast Index’s [`/episodes/byfeedurl`](https://podcastindex-org.github.io/docs-api/#get-/episodes/byfeedurl) endpoint.
 
-### GUID
+#### imageUrlHash
+A CRC32 hash of the podcast or episode image URL. It may be retreived from the Podcast Index’s [`/podcasts/byfeedurl`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byfeedurl), [`/podcasts/byguid`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byguid), [`/episodes/byguid`](https://podcastindex-org.github.io/docs-api/#get-/episodes/byguid) endpoints. If an episode doesn’t have 
 
-Global Unique Identifier. GUID from a podcast episode or show comes from podcast index.
+## Getting Started
 
-### Podcast Index
+### Installation
+1. Create an account with [The Podcast Index](https://api.podcastindex.org/signup) to acquire API keys.
+1. [Create an API token](https://developers.cloudflare.com/images/cloudflare-images/api-request/) to use with Cloudflare Images
+1. Install wragler globally: `yarn global add wrangler`
+1. Clone the repo:
+   ```sh
+   git clone https://github.com/felpsio/podcastimages.git
+   ```
+1. Run `yarn` in the installed folder
+1. Create a file called `.dev.vars` in the root folder and add the following configuragion:
+    ```
+    API_KEY = "PODCAST_INDEX_API_KEY"
+    API_SECRET = "PODCAST_INDEX_SECRET"
+    CLOUDFLARE_ACCOUNT_ID = "CLOUDFLARE_ACCOUNT_ID"
+    CLOUDFLARE_ACCOUNT_HASH = "CLOUDFLARE_ACCOUNT_HASH"
+    CLOUDFLARE_API_TOKEN = "CLOUDFLARE_API_TOKEN"
+    ```
+1. To run locally: `yarn start`
 
-Platform that brings tools to help work with the podcast. It provides an API to make easier to query podcast shows and episodes.
-
-### Crypto module
-
-The JavaScript runtime of Cloudflare Workers is not based on Node. So there won't be a pre-bundled module called crypto that you can require or import.
-
-## Installation
-
-- Install wragler globally: `yarn global add wrangler`
-- Run `yarn` in the installed folder
-- create a file called `.dev.vars` in the root folder and add the following configuragion:
-
-```
-API_KEY = "PODCAST_INDEX_API_KEY"
-API_SECRET = "PODCAST_INDEX_SECRET"
-CLOUDFLARE_ACCOUNT_ID = "CLOUDFLARE_ACCOUNT_ID"
-CLOUDFLARE_ACCOUNT_HASH = "CLOUDFLARE_ACCOUNT_HASH"
-CLOUDFLARE_API_TOKEN = "CLOUDFLARE_API_TOKEN"
-```
-
-## Variant
-
-Images variants can be 32px, 64px, 128px, 256px, 512px or 1024px.
+### Deploy
+1. Add your environment variables in your Cloudflare dashboard or your `wrangler.toml` file.
+1. Run `yarn deploy`
 
 ## Usage
 
-- To run locally: `yarn start`
+### Variants
 
-- To deploy/publish: `yarn deploy`
+By default, images will be resized down to 1024×1024 square images. Smaller images can be requested by appending one of the listed size variants to any URL. Current sizes include: 
+* 32
+* 64
+* 128
+* 256
+* 512
+* 1024
 
-## Routes
+### Routes
 
-`/feed/:podcastGUID/variant?`: receives a GUID of a podcast and returns the related image. It can receive size variants as argument to return the image with a specific format.
+#### Show query
+`/feed/:podcastGUID/:variant?`
+> Receives a podcastGUID, queries the Podcast Image for the current image URL and imageUrlHash, returns a podcast image from the cache, or serves the original image and queues a process to cache it.
+```
+<img src="http://localhost:8787/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/128">
+```
 
-- checks if there is already an cached image for the request. If there is one, return it. If there is not serve the original image and queue a process to cache it.
+#### Episode query
+`/feed/:podcastGUID/item/:episodeGUID/:variant?`
+> Receives a podcastGUID and an episodeGUID, queries the Podcast Image for the current image URL and imageUrlHash, returns an episode image from the cache, or serves the original image and queues a process to cache it.
+```
+<img src="http://localhost:8787/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/item/ef45a8c0-ec1d-11ec-8862-2be879b39c9e/1024">
+```
 
-`/feed/:feedId/item/:episodeGUID`: receives a feedId of a podcast and a GUID of a episode and returns the episode image. It can receive specific size variantes as arguments to return the image on the specific format
+#### Hash query with fallback
+`/hash/:imageUrlHash/:variant?`
+> Receives an imageUrlHash, skips the Podcast Index lookup, 404s if the image has not been cached. We recommend falling back to one of the other routes.
+```
+<img src="http://localhost:8787/hash/283379236/128" data-fallback="/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/item/f8e00bc8-9f47-11ec-adea-33b8a6094f44/128">
+<script>
+  let podcastimages = document.querySelectorAll('[data-fallback]');
+  podcastimages.forEach(image => {
+    image.addEventListener("error", (event) => {
+      image.src!=image.dataset.fallback ? image.src=image.dataset.fallback : false;
+    })
+  });
+</script>
+```
 
-- checks if there is already an cached image for the request. If there is one, return it. If there is not serve the original image and queue a process to cache it.
+## Roadmap
+- [x] Show images
+- [x] Episode Images
+- [ ] Landscape Cover Images
+- [ ] [`<podcast:person>`](https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md#person) Images
+- [ ] [`<podcast:chapters>`](https://github.com/Podcastindex-org/podcast-namespace/blob/main/chapters/jsonChapters.md#json-chapters-format) Images
+- [ ] [`<podcast:images>`](https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md#images) Images
 
-`404/not found`: if it's a invalid path or invalid parameters the API will return a simple 404 error
+## Contributing
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
 
-## Tests Examples
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-### Show query
-
-http://127.0.0.1:8787/feed/9b024349-ccf0-5f69-a609-6b82873eab3c
-
-### Episode query
-
-http://127.0.0.1:8787/feed/920666/item/PC2084
-
-## Deploy
-
-- Run `yarn deploy`
-- Go to your clodflare settings and add the production environment variables there.
-  - You can also add these credentials on `wrangler.toml` but it may expose these variables on github. So it's safer to copy and paste these variables again on cloudflare.
+## License
+Distributed under the MIT License. See `LICENSE.md` for more information.
