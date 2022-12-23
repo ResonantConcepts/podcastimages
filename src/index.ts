@@ -12,7 +12,7 @@ router.get('/feed/:podcastGUID/:variant?', async ({ params }) => {
 
     const response = await PIndexClient.getPodcastByGUID(podcastGUID);
 
-    const { image, imageUrlHash } = response.feed;
+    const { image } = response.feed;
 
     if (response.description === 'No feeds match this guid.')
       return new Response('Show not found.', { status: 404 });
@@ -20,30 +20,23 @@ router.get('/feed/:podcastGUID/:variant?', async ({ params }) => {
     if (response.status === 'false')
       return new Response('Invalid parameters', { status: 404 });
 
-    const upload: any = await ImageClient.uploadImage(
-      image,
-      imageUrlHash.toString()
-    );
+    const size = variant && [VARIANT_OPTIONS.includes(variant)]
+      ? parseInt(variant)
+      : 1024;
 
-    // image already exists on Cloudflare or it was uplodaded with success
-    const success =
-      upload.statusText === 'Conflict' || (await upload.json()).success;
-
-    if (success) {
-      let imgUrl = `https://imagedelivery.net/${CLOUDFLARE_ACCOUNT_HASH}/${imageUrlHash}`;
-      if (variant && [VARIANT_OPTIONS.includes(variant)])
-        imgUrl += `/${variant}`;
-      else imgUrl += '/1024';
-
-      return fetch(imgUrl);
-    }
+    return fetch(image, {
+      cf: {
+        image: {
+          fit: 'cover',
+          width: size,
+          height: size,
+        },
+      },
+    });
   } catch (error) {
     console.error(error);
     return new Response('Internal error', { status: 400 });
   }
-
-  // GUID not found
-  return new Response('Invalid parameters', { status: 404 });
 });
 
 router.get(
@@ -66,56 +59,43 @@ router.get(
         return new Response('Invalid parameters', { status: 404 });
 
       const image = response.episode.image || response.episode.feedImage;
-      const imageUrlHash = response.episode.imageUrlHash || response.episode.feedImageUrlHash;
 
-      const upload: any = await ImageClient.uploadImage(
-        image,
-        imageUrlHash.toString()
-      );
+      const size = variant && [VARIANT_OPTIONS.includes(variant)]
+        ? parseInt(variant)
+        : 1024;
 
-      // image already exists on Cloudflare or it was uplodaded with success
-      const success =
-        upload.statusText === 'Conflict' || (await upload.json()).success;
-
-      if (success) {
-        let imgUrl = `https://imagedelivery.net/${CLOUDFLARE_ACCOUNT_HASH}/${imageUrlHash}`;
-        if (variant && [VARIANT_OPTIONS.includes(variant)])
-          imgUrl += `/${variant}`;
-        else imgUrl += '/1024';
-
-        return fetch(imgUrl);
-      }
-    } catch (error) {
-      console.error(error);
-      return new Response('Internal error', { status: 400 });
-    }
-
-    // GUID not found
-    return new Response('Invalid parameters', { status: 404 });
-  }
-);
-
-router.get(
-  '/hash/:imageUrlHash/:variant?',
-  async ({ params }) => {
-    if (!params) return new Response('No params', { status: 400 });
-
-    try {
-      const { imageUrlHash, variant } = params;
-
-      let imgUrl = `https://imagedelivery.net/${CLOUDFLARE_ACCOUNT_HASH}/${imageUrlHash}`;
-      if (variant && [VARIANT_OPTIONS.includes(variant)])
-        imgUrl += `/${variant}`;
-      else imgUrl += '/1024';
-
-      return fetch(imgUrl);
-
+      return fetch(image, {
+        cf: {
+          image: {
+            fit: 'cover',
+            width: size,
+            height: size,
+          },
+        },
+      });
     } catch (error) {
       console.error(error);
       return new Response('Internal error', { status: 400 });
     }
   }
 );
+
+router.get('/hash/:imageUrlHash/:variant?', async ({ params }) => {
+  if (!params) return new Response('No params', { status: 400 });
+
+  try {
+    const { imageUrlHash, variant } = params;
+
+    let imgUrl = `https://imagedelivery.net/${CLOUDFLARE_ACCOUNT_HASH}/${imageUrlHash}`;
+    if (variant && [VARIANT_OPTIONS.includes(variant)]) imgUrl += `/${variant}`;
+    else imgUrl += '/1024';
+
+    return fetch(imgUrl);
+  } catch (error) {
+    console.error(error);
+    return new Response('Internal error', { status: 400 });
+  }
+});
 
 router.all('*', () => new Response('404, not found!', { status: 404 }));
 
