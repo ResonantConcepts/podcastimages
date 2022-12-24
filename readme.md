@@ -2,7 +2,7 @@
 
 # Podcast images
 
-> Store, optimize, and deliver podcast images with CloudFlare Images
+> Store, optimize, and deliver podcast images with Cloudflare
 
 ## Table of Contents
 
@@ -18,8 +18,6 @@
 
 Apple’s [artwork requirements](https://podcasters.apple.com/support/896-artwork-requirements) requires a square 3000×3000 `JPG` or `PNG` file for show covers. In reality, trusting that all feeds will conform to that guidance is a recipe for disaster. From simple issues like non-square images to slow-loading, multi-megabyte `PSD` files, scraping RSS feeds reveals a perplexing array of outliers.
 
-By using Cloudflare Images, we can cache smaller, optimized images and intelligently delivery the most optimized version of the image without worrying about file extensions.
-
 ## Glossary
 
 #### Podcast GUID
@@ -32,20 +30,27 @@ A global unique identifier for an episode. It may be found in an RSS feed within
 
 #### imageUrlHash
 
-A CRC32 hash of the podcast or episode image URL. It may be retreived from the Podcast Index’s [`/podcasts/byfeedurl`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byfeedurl), [`/podcasts/byguid`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byguid), [`/episodes/byguid`](https://podcastindex-org.github.io/docs-api/#get-/episodes/byguid) endpoints. If an episode doesn’t have
+A CRC32 hash of the podcast or episode image URL. It may be retreived from the Podcast Index’s [`/podcasts/byfeedurl`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byfeedurl), [`/podcasts/byguid`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byguid), [`/episodes/byguid`](https://podcastindex-org.github.io/docs-api/#get-/episodes/byguid) endpoints.
 
 ## Getting Started
 
 ### Installation
 
 1. Create an account with [The Podcast Index](https://api.podcastindex.org/signup) to acquire API keys.
-1. [Create an API token](https://developers.cloudflare.com/images/cloudflare-images/api-request/) to use with Cloudflare Images
-1. Install wragler globally: `yarn global add wrangler`
-1. Clone the repo:
+1. Cloudflare Image Resizing requires a **PRO** or higher Cloudflare account and [must be activated](https://developers.cloudflare.com/images/image-resizing/enable-image-resizing/).
+1. [Create an API token](https://developers.cloudflare.com/images/cloudflare-images/api-request/) to use with Cloudflare
+1. Install wragler globally:
    ```sh
-   git clone https://github.com/felpsio/podcastimages.git
+   yarn global add wrangler
    ```
-1. Run `yarn` in the installed folder
+1. Clone the project:
+   ```sh
+   git clone https://github.com/resonantconcepts/podcastimages.git
+   ```
+1. Navigate into the project’s directory and set it up:
+   ```sh
+   cd podcastimages/ && yarn
+   ```
 1. Create a file called `.dev.vars` in the root folder and add the following configuragion:
    ```
    API_KEY = "PODCAST_INDEX_API_KEY"
@@ -56,6 +61,9 @@ A CRC32 hash of the podcast or episode image URL. It may be retreived from the P
    ```
 1. To run locally: `yarn start`
 
+> **Note**
+> Cloudflare Image Resizing doesn’t work locally. All local requests will return the original image.
+
 ### Deploy
 
 Run `yarn deploy`
@@ -63,7 +71,7 @@ Run `yarn deploy`
 #### First deploy Configuration
 
 1. Add your environment variables in your Cloudflare dashboard or your `wrangler.toml` file.
-2. Add your custom domain to cloudflare.
+2. Add your custom domain to Cloudflare.
 3. Inside your domain configurations associate the worker route to the domain.
 4. Inside `wranger.toml` add the following configuration:
 
@@ -73,11 +81,8 @@ routes = [
 ]
 ```
 
-Be careful on adding additional break lines on this configuration, it may break the deploy.
-
-**P.S.:** Cloudflare Image Resizing doesn't work on local development. So if test it locally you'll always get the original image as response.
-
-**P.S.2**: Cloudflare Image Resizing requires a **PRO** or higher Cloudflare Account and needs to be activated. Instructions can be found [here](https://developers.cloudflare.com/images/image-resizing/enable-image-resizing/)
+> **Note**
+> Avoid adding additional break lines to this configuration, it may break the deploy.
 
 ## Usage
 
@@ -157,5 +162,3 @@ Don't forget to give the project a star! Thanks again!
 Distributed under the MIT License. See `LICENSE.md` for more information.
 
 The script preview of the Worker editor ignores fetch() options, and will always fetch unresized images. To see the effect of Image Resizing you must deploy the Worker script and use it outside of the editor.
-
-​​
