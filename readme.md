@@ -30,7 +30,7 @@ A global unique identifier for an episode. It may be found in an RSS feed within
 
 #### imageUrlHash
 
-A CRC32 hash of the podcast or episode image URL. It may be retreived from the Podcast Index’s [`/podcasts/byfeedurl`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byfeedurl), [`/podcasts/byguid`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byguid), [`/episodes/byguid`](https://podcastindex-org.github.io/docs-api/#get-/episodes/byguid) endpoints.
+A CRC32 hash of the podcast or episode image URL with the protocol (`http://`, `https://`) removed. It can be retreived from the Podcast Index’s [`/podcasts/byfeedurl`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byfeedurl), [`/podcasts/byguid`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byguid), [`/episodes/byguid`](https://podcastindex-org.github.io/docs-api/#get-/episodes/byguid) endpoints.
 
 ## Getting Started
 
