@@ -1,75 +1,116 @@
+![Logo](/logo.svg)
+
 # Podcast images
 
-## Goal
+> Store, optimize, and deliver podcast images with the Podcast Index and Cloudflare
 
-Cache and host podcast images allowing the entire web to use thse links.
+## Table of Contents
+
+1. [About The Project](#about-the-project)
+1. [Getting Started](#getting-started)
+1. [Glossary](#glossary)
+1. [Usage](#usage)
+1. [Roadmap](#roadmap)
+1. [Contributing](#contributing)
+1. [License](#license)
+
+## About The Project
+
+Apple’s [artwork requirements](https://podcasters.apple.com/support/896-artwork-requirements) requires a square 3000×3000 `JPG` or `PNG` file for show covers. In reality, trusting that all feeds will conform to that guidance is a recipe for disaster. From simple issues like non-square images to slow-loading, multi-megabyte `PSD` files, scraping RSS feeds reveals a perplexing array of outliers.
+
+With The Podcast Index, we can retrieve show and episode artwork URLs. Cloudflare Image Resizing allows us to deliver optimzed variants at [fantastic prices](https://www.cloudflare.com/plans/#add-ons). With caching, the costs shrink further.
+
+## Getting Started
+
+### Prerequisites
+
+- [x] An API Key and Secret from [The Podcast Index](https://podcastindex.org/)
+- [x] A Pro or above Cloudflare plan with [Cloudflare Image Resizing enabled](https://developers.cloudflare.com/images/image-resizing/enable-image-resizing/)
+
+### Setup
+1. Clone the project and navigate into it’s directory:
+   ```sh
+   git clone https://github.com/resonantconcepts/podcastimages.git && cd podcastimages/
+   ```
+1. Install dependancies and login to Cloudflare:
+   ```sh
+   yarn && npm install -g wrangler && wrangler login
+   ```
+1. Create a `wrangler.toml` from the example.
+   ```sh
+   cp wrangler.toml.example wrangler.toml
+   ```
+1. Add your environment variables and routes to `wrangler.toml`
+1. Deploy to Cloudflare Workers with:
+   ```sh
+   yarn deploy
+   ```
 
 ## Glossary
 
-### Wrangler
+#### Podcast GUID
 
-command line tool used by cloudflare to manage the serveless environment.
+A global unique identifier for a podcast. It may be found in an RSS feed within the [`<podcast:guid>`](https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md#guid) tag or retreived from the Podcast Index’s [`/podcasts/byfeedurl`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byfeedurl) endpoint.
 
-### GUID
+#### Episode GUID
 
-Global Unique Identifier. GUID from a podcast episode or show comes from podcast index.
-
-### Podcast Index
-
-Platform that brings tools to help work with the podcast. It provides an API to make easier to query podcast shows and episodes.
-
-### Crypto module
-
-The JavaScript runtime of Cloudflare Workers is not based on Node. So there won't be a pre-bundled module called crypto that you can require or import.
-
-## Installation
-
-- Install wragler globally: `yarn global add wrangler`
-- Run `yarn` in the installed folder
-- create a file called `.dev.vars` in the root folder and add the following configuragion:
-
-```
-API_KEY = "PODCAST_INDEX_API_KEY"
-API_SECRET = "PODCAST_INDEX_SECRET"
-CLOUDFLARE_ACCOUNT_ID = "CLOUDFLARE_ACCOUNT_ID"
-CLOUDFLARE_ACCOUNT_HASH = "CLOUDFLARE_ACCOUNT_HASH"
-CLOUDFLARE_API_TOKEN = "CLOUDFLARE_API_TOKEN"
-```
-
-## Variant
-
-Images variants can be 32px, 64px, 128px, 256px, 512px or 1024px.
+A global unique identifier for an episode. It may be found in an RSS feed within an episode’s [`<guid>`](https://podcasters.apple.com/support/837-change-the-rss-feed-url#:~:text=What%E2%80%99s%20an%20episode%20GUID%3F) tag or retreived from the Podcast Index’s [`/episodes/byfeedurl`](https://podcastindex-org.github.io/docs-api/#get-/episodes/byfeedurl) endpoint.
 
 ## Usage
 
-- To run locally: `yarn start`
+> **Warning**
+> Cloudflare Image Resizing is not simulated locally. Local requests will always fetch unresized images. To see the effect of Image Resizing you must deploy the Worker.
 
-- To deploy/publish: `yarn deploy`
+### Variants
 
-## Routes
+By default, images will be resized down to 1024×1024 images, using `fit=cover` for non-square when needed. Smaller images can be requested by appending one of the listed size variants to any URL. Current sizes include:
 
-`/feed/:podcastGUID/variant?`: receives a GUID of a podcast and returns the related image. It can receive size variants as argument to return the image with a specific format.
+- 32
+- 64
+- 128
+- 256
+- 512
+- 1024
 
-- checks if there is already an cached image for the request. If there is one, return it. If there is not serve the original image and queue a process to cache it.
+### Routes
 
-`/feed/:feedId/item/:episodeGUID`: receives a feedId of a podcast and a GUID of a episode and returns the episode image. It can receive specific size variantes as arguments to return the image on the specific format
+All routes receive parameters and serve a cached response if available. Otherwise, they query The Podcast Index for the current image URL, resizes it, caches the response, and delivers the image.
 
-- checks if there is already an cached image for the request. If there is one, return it. If there is not serve the original image and queue a process to cache it.
+#### Show query
 
-`404/not found`: if it's a invalid path or invalid parameters the API will return a simple 404 error
+`/feed/:podcastGUID/:variant?`
 
-## Tests Examples
+```html
+<img src="http://localhost:8787/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/128">
+```
 
-### Show query
+#### Episode query
 
-http://127.0.0.1:8787/feed/9b024349-ccf0-5f69-a609-6b82873eab3c
+`/feed/:podcastGUID/item/:episodeGUID/:variant?`
 
-### Episode query
+```html
+<img src="http://localhost:8787/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/item/ef45a8c0-ec1d-11ec-8862-2be879b39c9e/1024">
+```
 
-http://127.0.0.1:8787/feed/920666/item/PC2084
+## Roadmap
 
-## Deploy
+- [x] Show images
+- [x] Episode Images
+- [ ] Landscape Cover Images
+- [ ] Dominant Color Endpoint
+- [ ] Fill and purge cache with 
 
-- Run `yarn deploy`
-- Go to your clodflare settings and add the production environment variables there.
-  - You can also add these credentials on `wrangler.toml` but it may expose these variables on github. So it's safer to copy and paste these variables again on cloudflare.
+## Contributing
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+Distributed under the MIT License. See `LICENSE.md` for more information.

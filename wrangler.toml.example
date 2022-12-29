@@ -1,0 +1,10 @@
+name = "podcastimages"
+compatibility_date = "2022-11-19"
+node_compat = true
+routes = [
+	{ pattern = "SUBDOMAIN.DOMAIN.COM", custom_domain = true, zone_name = "DOMAIN.COM" }
+]
+
+[vars]
+API_KEY = "API_KEY"
+API_SECRET = "API_SECRET"

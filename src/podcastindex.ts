@@ -34,7 +34,7 @@ async function GET<T = any>(
           'X-Auth-Date': apiHeaderTime.toString(),
           'X-Auth-Key': API_KEY,
           Authorization: authorization,
-          'User-Agent': 'SuperPodcastPlayer/1.8', // this is required
+          'User-Agent': 'PodcastImages.com/1.0', // this is required
         },
       }
     );
