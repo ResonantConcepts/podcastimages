@@ -24,12 +24,30 @@ router.get('/feed/:podcastGUID/:variant?', async ({ params }) => {
       ? parseInt(variant)
       : 1024;
 
+    let options = {
+      anim: false,
+      fit: 'cover',
+      width: size,
+      height: size,
+    };
+
+    if (variant === 'landscape') {
+      options.fit = 'contain';
+      options.width = 512;
+      options.height = 512;
+      options.border = {
+        color: "#FFFFFF",
+        top: 104,
+        right: 384,
+        bottom: 104,
+        left: 384
+      };
+    }
+
     return fetch(image, {
       cf: {
         image: {
-          fit: 'cover',
-          width: size,
-          height: size,
+          ...options,
         },
       },
     });
@@ -63,13 +81,31 @@ router.get(
       const size = variant && [VARIANT_OPTIONS.includes(variant)]
         ? parseInt(variant)
         : 1024;
+      
+      let options = {
+        anim: false,
+        fit: 'cover',
+        width: size,
+        height: size,
+      };
+  
+      if (variant === 'landscape') {
+        options.fit = 'contain';
+        options.width = 512;
+        options.height = 512;
+        options.border = {
+          color: "#FFFFFF",
+          top: 104,
+          right: 384,
+          bottom: 104,
+          left: 384
+        };
+      }
 
       return fetch(image, {
         cf: {
           image: {
-            fit: 'cover',
-            width: size,
-            height: size,
+            ...options,
           },
         },
       });

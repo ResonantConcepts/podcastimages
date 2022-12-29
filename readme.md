@@ -61,17 +61,6 @@ A global unique identifier for an episode. It may be found in an RSS feed within
 > **Warning**
 > Cloudflare Image Resizing is not simulated locally. Local requests will always fetch unresized images. To see the effect of Image Resizing you must deploy the Worker.
 
-### Variants
-
-By default, images will be resized down to 1024×1024 images, using `fit=cover` for non-square when needed. Smaller images can be requested by appending one of the listed size variants to any URL. Current sizes include:
-
-- 32
-- 64
-- 128
-- 256
-- 512
-- 1024
-
 ### Routes
 
 All routes receive parameters and serve a cached response if available. Otherwise, they query The Podcast Index for the current image URL, resizes it, caches the response, and delivers the image.
@@ -81,7 +70,7 @@ All routes receive parameters and serve a cached response if available. Otherwis
 `/feed/:podcastGUID/:variant?`
 
 ```html
-<img src="http://localhost:8787/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/128">
+<img src="http://SUBDOMAIN.DOMAIN.COM/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/512">
 ```
 
 #### Episode query
@@ -89,7 +78,24 @@ All routes receive parameters and serve a cached response if available. Otherwis
 `/feed/:podcastGUID/item/:episodeGUID/:variant?`
 
 ```html
-<img src="http://localhost:8787/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/item/ef45a8c0-ec1d-11ec-8862-2be879b39c9e/1024">
+<img src="http://SUBDOMAIN.DOMAIN.COM/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/item/ef45a8c0-ec1d-11ec-8862-2be879b39c9e/512">
+```
+
+### Variants
+
+By default, images will be resized down to 1024×1024, using `fit=cover` for non-square when needed. Smaller images can be requested by appending one of the listed size variants to any URL. Current sizes include:
+
+- 32
+- 64
+- 128
+- 256
+- 512
+- 1024
+
+To generate landscape images for social media, using `landscape` as the variant will produce a 1280×720 image with the artwork set within a 512×512 square.
+
+```html
+<meta property="og:image" content="http://SUBDOMAIN.DOMAIN.COM/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/landscape"/>
 ```
 
 ## Roadmap
