@@ -2,7 +2,7 @@
 
 # Podcast images
 
-> Store, optimize, and deliver podcast images with Cloudflare
+> Store, optimize, and deliver podcast images with the Podcast Index and Cloudflare
 
 ## Table of Contents
 
@@ -18,24 +18,30 @@
 
 Apple’s [artwork requirements](https://podcasters.apple.com/support/896-artwork-requirements) requires a square 3000×3000 `JPG` or `PNG` file for show covers. In reality, trusting that all feeds will conform to that guidance is a recipe for disaster. From simple issues like non-square images to slow-loading, multi-megabyte `PSD` files, scraping RSS feeds reveals a perplexing array of outliers.
 
+With The Podcast Index, we can retrieve show and episode artwork URLs. Cloudflare Image Resizing allows us to deliver optimzed variants at [fantastic prices](https://www.cloudflare.com/plans/#add-ons). With caching, the costs shrink further.
+
 ## Getting Started
 
 ### Prerequisites
 
 - [x] An API Key and Secret from [The Podcast Index](https://podcastindex.org/)
-- [x] A Pro or above Cloudflare plan with [Cloudflare Image Resizing enabled](https://developers.cloudflare.com/images/image-resizing/enable-image-resizing/) on your domain
+- [x] A Pro or above Cloudflare plan with [Cloudflare Image Resizing enabled](https://developers.cloudflare.com/images/image-resizing/enable-image-resizing/)
 
-### Installation
-1. Clone the project:
+### Setup
+1. Clone the project and navigate into it’s directory:
    ```sh
-   git clone https://github.com/resonantconcepts/podcastimages.git
+   git clone https://github.com/resonantconcepts/podcastimages.git && cd podcastimages/
    ```
-1. Navigate into the project’s directory and set it up:
+1. Install dependancies and login to Cloudflare:
    ```sh
-   cd podcastimages/ && yarn
+   yarn && npm install -g wrangler && wrangler login
    ```
-1. Rename `wrangler.toml.example` to `wrangler.toml` and fill in your environment variables and routes
-1. Deploy to Cloudflare workers with:
+1. Create a `wrangler.toml` from the example.
+   ```sh
+   cp wrangler.toml.example wrangler.toml
+   ```
+1. Add your environment variables and routes to `wrangler.toml`
+1. Deploy to Cloudflare Workers with:
    ```sh
    yarn deploy
    ```
@@ -57,7 +63,7 @@ A global unique identifier for an episode. It may be found in an RSS feed within
 
 ### Variants
 
-By default, images will be resized down to 1024×1024 square images. Smaller images can be requested by appending one of the listed size variants to any URL. Current sizes include:
+By default, images will be resized down to 1024×1024 images, using `fit=cover` for non-square when needed. Smaller images can be requested by appending one of the listed size variants to any URL. Current sizes include:
 
 - 32
 - 64
@@ -68,11 +74,11 @@ By default, images will be resized down to 1024×1024 square images. Smaller ima
 
 ### Routes
 
+All routes receive parameters and serve a cached response if available. Otherwise, they query The Podcast Index for the current image URL, resizes it, caches the response, and delivers the image.
+
 #### Show query
 
 `/feed/:podcastGUID/:variant?`
-
-> Receives a podcastGUID, queries the Podcast Image for the current image URL, returns an image from the cache, or serves the original image and queues a process to cache it.
 
 ```html
 <img src="http://localhost:8787/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/128">
@@ -81,8 +87,6 @@ By default, images will be resized down to 1024×1024 square images. Smaller ima
 #### Episode query
 
 `/feed/:podcastGUID/item/:episodeGUID/:variant?`
-
-> Receives a podcastGUID and an episodeGUID, queries the Podcast Image for the current image URL, returns an image from the cache, or serves the original image and queues a process to cache it.
 
 ```html
 <img src="http://localhost:8787/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/item/ef45a8c0-ec1d-11ec-8862-2be879b39c9e/1024">
@@ -94,6 +98,7 @@ By default, images will be resized down to 1024×1024 square images. Smaller ima
 - [x] Episode Images
 - [ ] Landscape Cover Images
 - [ ] Dominant Color Endpoint
+- [ ] Fill and purge cache with 
 
 ## Contributing
 
