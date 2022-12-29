@@ -1,7 +1,7 @@
 import { Router } from 'itty-router';
-import PIndexClient from './features/podcastindex/podcastindex';
-import ImageClient, { VARIANT_OPTIONS } from './features/images/images-api';
+import PIndexClient from './podcastindex';
 
+const VARIANT_OPTIONS = ['32', '64', '128', '256', '512', '1024'];
 const router = Router();
 
 router.get('/feed/:podcastGUID/:variant?', async ({ params }) => {
@@ -79,23 +79,6 @@ router.get(
     }
   }
 );
-
-router.get('/hash/:imageUrlHash/:variant?', async ({ params }) => {
-  if (!params) return new Response('No params', { status: 400 });
-
-  try {
-    const { imageUrlHash, variant } = params;
-
-    let imgUrl = `https://imagedelivery.net/${CLOUDFLARE_ACCOUNT_HASH}/${imageUrlHash}`;
-    if (variant && [VARIANT_OPTIONS.includes(variant)]) imgUrl += `/${variant}`;
-    else imgUrl += '/1024';
-
-    return fetch(imgUrl);
-  } catch (error) {
-    console.error(error);
-    return new Response('Internal error', { status: 400 });
-  }
-});
 
 router.all('*', () => new Response('404, not found!', { status: 404 }));
 
