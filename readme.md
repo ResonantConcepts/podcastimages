@@ -122,7 +122,7 @@ Don't forget to give the project a star! Thanks again!
 
 This is an independent open-source project self-funded by [Nathan Gathright](https://github.com/nathangathright). If you use it in your own work, please consider supporting its ongoing development by using one of the options below:
 
-<a class="btn btn-large" href="https://buy.stripe.com/eVa15scEr1XAgOQ3cc">Stripe →</a> <a class="btn btn-large" href="https://getalby.com/p/nathang">Alby →</a>
+[Stripe →](https://buy.stripe.com/eVa15scEr1XAgOQ3cc) [Alby →](https://getalby.com/p/nathang)
 
 ### Micropayments
 If you wish to send streaming micropayments to Minipub over the Lightning network, add the following info to your RSS feed’s [value tag](https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md#value):
