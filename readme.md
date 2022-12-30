@@ -49,6 +49,10 @@ With The Podcast Index, we can retrieve show and episode artwork URLs. Cloudflar
 
 ## Glossary
 
+#### imageUrlHash
+
+A CRC32 hash of the podcast or episode image URL with the protocol (`http://`, `https://`) removed. It can be retreived from the Podcast Index’s [`/podcasts/byfeedurl`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byfeedurl), [`/podcasts/byguid`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byguid), [`/episodes/byguid`](https://podcastindex-org.github.io/docs-api/#get-/episodes/byguid) endpoints.
+
 #### Podcast GUID
 
 A global unique identifier for a podcast. It may be found in an RSS feed within the [`<podcast:guid>`](https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md#guid) tag or retreived from the Podcast Index’s [`/podcasts/byfeedurl`](https://podcastindex-org.github.io/docs-api/#get-/podcasts/byfeedurl) endpoint.
@@ -68,18 +72,18 @@ All routes receive parameters and serve a cached response if available. Otherwis
 
 #### Show query
 
-`/feed/:podcastGUID/:variant?`
+`hash/:imgUrlHash/feed/:podcastGUID/:variant?`
 
 ```html
-<img src="http://SUBDOMAIN.DOMAIN.COM/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/512">
+<img src="http://SUBDOMAIN.DOMAIN.COM/hash/3463027081/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/512">
 ```
 
 #### Episode query
 
-`/feed/:podcastGUID/item/:episodeGUID/:variant?`
+`hash/:imgUrlHash/feed/:podcastGUID/item/:episodeGUID/:variant?`
 
 ```html
-<img src="http://SUBDOMAIN.DOMAIN.COM/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/item/ef45a8c0-ec1d-11ec-8862-2be879b39c9e/512">
+<img src="http://SUBDOMAIN.DOMAIN.COM/hash/2837567118/feed/b9cd9278-2679-5cfd-9bc7-7f1e04f1cba4/item/ef45a8c0-ec1d-11ec-8862-2be879b39c9e/512">
 ```
 
 ### Variants

@@ -4,11 +4,11 @@ import PIndexClient from './podcastindex';
 const VARIANT_OPTIONS = ['32', '64', '128', '256', '512', '1024'];
 const router = Router();
 
-router.get('/feed/:podcastGUID/:variant?', async ({ params }) => {
+router.get('/hash/:imgUrlHash/feed/:podcastGUID/:variant?', async ({ params }) => {
   if (!params) return new Response('No params', { status: 400 });
 
   try {
-    const { podcastGUID, variant } = params;
+    const { imgUrlHash, podcastGUID, variant } = params;
 
     const response = await PIndexClient.getPodcastByGUID(podcastGUID);
 
@@ -58,12 +58,12 @@ router.get('/feed/:podcastGUID/:variant?', async ({ params }) => {
 });
 
 router.get(
-  '/feed/:podcastGUID/item/:episodeGUID/:variant?',
+  '/hash/:imgUrlHash/feed/:podcastGUID/item/:episodeGUID/:variant?',
   async ({ params }) => {
     if (!params) return new Response('No params', { status: 400 });
 
     try {
-      const { podcastGUID, episodeGUID, variant } = params;
+      const { imgUrlHash, podcastGUID, episodeGUID, variant } = params;
 
       const response = await PIndexClient.getEpisodeByGUID(
         podcastGUID,
