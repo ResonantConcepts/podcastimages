@@ -125,7 +125,7 @@ This is an independent open-source project self-funded by [Nathan Gathright](htt
 [Stripe →](https://buy.stripe.com/eVa15scEr1XAgOQ3cc) [Alby →](https://getalby.com/p/nathang)
 
 ### Micropayments
-If you wish to send streaming micropayments to Minipub over the Lightning network, add the following info to your RSS feed’s [value tag](https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md#value):
+If you wish to send streaming micropayments over the Lightning network, add the following info to your RSS feed’s [value tag](https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md#value):
 
 ```xml
 <podcast:value type="lightning" method="keysend">
