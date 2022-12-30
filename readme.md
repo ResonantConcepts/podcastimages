@@ -12,6 +12,7 @@
 1. [Usage](#usage)
 1. [Roadmap](#roadmap)
 1. [Contributing](#contributing)
+1. [Funding](#funding)
 1. [License](#license)
 
 ## About The Project
@@ -102,9 +103,9 @@ To generate landscape images for social media, using `landscape` as the variant 
 
 - [x] Show images
 - [x] Episode Images
-- [ ] Landscape Cover Images
+- [x] Landscape Cover Images
 - [ ] Dominant Color Endpoint
-- [ ] Fill and purge cache with 
+- [ ] Cache purging
 
 ## Contributing
 
@@ -116,6 +117,21 @@ Don't forget to give the project a star! Thanks again!
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+## Funding
+
+This is an independent open-source project self-funded by [Nathan Gathright](https://github.com/nathangathright). If you use it in your own work, please consider supporting its ongoing development by using one of the options below:
+
+<a class="btn btn-large" href="https://buy.stripe.com/eVa15scEr1XAgOQ3cc">Stripe →</a> <a class="btn btn-large" href="https://getalby.com/p/nathang">Alby →</a>
+
+### Micropayments
+If you wish to send streaming micropayments to Minipub over the Lightning network, add the following info to your RSS feed’s [value tag](https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md#value):
+
+```xml
+<podcast:value type="lightning" method="keysend">
+   <podcast:valueRecipient name="nathang@getalby.com" type="node" address="030a58b8653d32b99200a2334cfe913e51dc7d155aa0116c176657a4f1722677a3" customKey="696969" customValue="2yjUCncyVMyWY31einuk" split="100"/>
+</podcast:value>
+```
 
 ## License
 
