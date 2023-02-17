@@ -7,6 +7,7 @@
 ## Table of Contents
 
 1. [About The Project](#about-the-project)
+1. [Pricing](#pricing)
 1. [Getting Started](#getting-started)
 1. [Glossary](#glossary)
 1. [Usage](#usage)
@@ -19,7 +20,24 @@
 
 Apple’s [artwork requirements](https://podcasters.apple.com/support/896-artwork-requirements) requires a square 3000×3000 `JPG` or `PNG` file for show covers. In reality, trusting that all feeds will conform to that guidance is a recipe for disaster. From simple issues like non-square images to slow-loading, multi-megabyte `PSD` files, scraping RSS feeds reveals a perplexing array of outliers.
 
-With The Podcast Index, we can retrieve show and episode artwork URLs. Cloudflare Image Resizing allows us to deliver optimzed variants at [fantastic prices](https://www.cloudflare.com/plans/#add-ons). With caching, the costs shrink further.
+With The Podcast Index, we can retrieve show and episode artwork URLs. Cloudflare Image Resizing allows us to deliver optimzed variants cheaply:
+
+## Pricing
+
+* [The Podcast Index](https://podcastindex.org/): Free podcast API
+* [Image Resizing](https://www.cloudflare.com/plans/#add-ons): 50,000 monthly resizing requests included with Pro, Business. $9 per additional 50,000 resizing requests.
+* [Cloudflare Workers](https://developers.cloudflare.com/workers/platform/pricing/): The free pan includes 100,000 requests per day. Crossing into their paid plan has a minimum fee of $5 USD per month, but includes 10 million requests per month, + $0.50 per additional million.
+
+|Monthly Requests|Workers with Discounts|
+|:----|:----|
+|50,000|$0.00|
+|100,000|$9.00|
+|500,000|$81.00|
+|1,000,000|$171.00|
+|5,000,000|$891.00|
+|10,000,000|$1,791.00|
+
+With caching, the costs shrink further.
 
 ## Getting Started
 
